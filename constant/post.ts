@@ -91,7 +91,7 @@ export const content: Content[] = [
       {
         id: 2,
         image: 'yudisium2',
-        title: 'Judul Postingan dengan kategori event',
+        title: 'Yudisium kedua',
         desc: 'Deskripsi Postingan',
         startDate: 'tanggal postingan',
         endDate: 'tanggal postingan',
