@@ -52,7 +52,7 @@ export const content: Content[] = [
         title: 'beasiswa',
         desc: 'Deskripsi Postina',
         startDate: 'tanggal postingan',
-        endDate: 'tanggal postingan',
+        endDate: 'tanggal posting',
       },
     ],
   },
