@@ -41,7 +41,7 @@ export const content: Content[] = [
       {
         id: 1,
         image: 'beasiswa1',
-        title: 'Festival Pendidikan Indonesia',
+        title: 'Beasiswa BI',
         desc: 'Hello sobat Mahasiswa....',
         startDate: 'tanggal postingan kapan..',
         endDate: 'tanggal postingan kapan..',
