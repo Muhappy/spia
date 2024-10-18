@@ -49,7 +49,7 @@ export const content: Content[] = [
       {
         id: 2,
         image: 'beasiswa2',
-        title: 'Judul Postingan dengan kategori event',
+        title: 'beasiswa',
         desc: 'Deskripsi Postingan',
         startDate: 'tanggal postingan',
         endDate: 'tanggal postingan',
