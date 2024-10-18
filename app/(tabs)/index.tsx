@@ -24,7 +24,7 @@ export default function Home() {
               className="h-[100px] w-[100px] rounded-full "
             />
             <Text className="mt-4 text-xl font-semibold">Selamat Datang Rifko Akbar</Text>
-            <Text className="text-center text-lg text-gray-600">Mau cari pengumuman apa?</Text>
+            <Text className="text-center text-lg text-gray-600">Temukan pengumuman yang kamu butuhkan di sini!</Text>
           </View>
           <View className="mt-8">
             <Text className="text-lg font-bold">Kategori Pengumuman</Text>

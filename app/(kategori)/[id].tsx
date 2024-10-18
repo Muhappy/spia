@@ -16,6 +16,12 @@ export default function Kategori() {
   const { id } = useLocalSearchParams();
 
   const fileteredPost = content.filter((item) => item.id === id).flatMap((item) => item.posts);
+  function truncateString(input: string, maxLength: number, suffix: string = '...'): string {
+    if (input.length <= maxLength) {
+      return input;
+    }
+    return input.slice(0, maxLength) + suffix;
+  }
   return (
     <>
       <Stack.Screen options={{ title: `KATEGORI ${id.toString().toUpperCase()}` }} />
@@ -38,7 +44,7 @@ export default function Kategori() {
                   resizeMode="cover">
                   <View className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-black/60 p-4">
                     <Text className="text-lg font-bold text-white">{item.title}</Text>
-                    <Text className="text-sm text-white">{item.desc}</Text>
+                    <Text className="text-sm text-white">{truncateString(item.desc, 50)}</Text>
                     <View className="mt-2 flex flex-row justify-between">
                       <Text className="text-sm font-bold text-white">{item.startDate}</Text>
                       <Text className="text-sm font-bold text-white">{item.endDate}</Text>
