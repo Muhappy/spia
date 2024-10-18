@@ -50,7 +50,7 @@ export const content: Content[] = [
         id: 2,
         image: 'beasiswa2',
         title: 'beasiswa',
-        desc: 'Deskripsi Postingan',
+        desc: 'Deskripsi Postinga',
         startDate: 'tanggal postingan',
         endDate: 'tanggal postingan',
       },
