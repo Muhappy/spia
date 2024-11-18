@@ -1,57 +1,70 @@
 import React, { useState } from 'react'
-import { Alert, StyleSheet, View, AppState, Platform } from 'react-native'
-import { supabase } from 'utils/supabase'
+import { Alert, StyleSheet, View, AppState } from 'react-native'
+import { supabase } from '~/utils/supabase'
 import { Button, Input } from '@rneui/themed'
-import axios from 'utils/axios'
-import { loadUser, login } from '~/services/AuthServices'
 
+// Tells Supabase Auth to continuously refresh the session automatically if
+// the app is in the foreground. When this is added, you will continue to receive
+// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
+// if the user's session is terminated. This should only be registered once.
+AppState.addEventListener('change', (state) => {
+  if (state === 'active') {
+    supabase.auth.startAutoRefresh()
+  } else {
+    supabase.auth.stopAutoRefresh()
+  }
+})
 
 export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState({})
+  const [fullName, setFullName] = useState('')
 
   async function signInWithEmail() {
-    setErrorMessage({})
     setLoading(true)
-    try {
-      await login( {
-        email,
-        password,
-        device_name: `${Platform.OS} ${Platform.Version}`,
-      })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    })
+
+    if (error) Alert.alert(error.message)
       
-      const user = await loadUser()
-      console.log(user)
-      
-    } catch (e: any) {
-      if (e.response?.status === 422) {
-        setErrorMessage(e.response.data.errors)
-      }
-      
-    }
-    
     setLoading(false)
   }
 
-  // async function signUpWithEmail() {
-  //   setLoading(true)
-  //   const {
-  //     data: { session },
-  //     error,
-  //   } = await supabase.auth.signUp({
-  //     email: email,
-  //     password: password,
-  //   })
+  async function signUpWithEmail() {
+    setLoading(true)
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    })
 
-  //   if (error) Alert.alert(error.message)
-  //   if (!session) Alert.alert('Please check your inbox for email verification!')
-  //   setLoading(false)
-  // }
+    if (error) Alert.alert(error.message)
+    // if (!session) Alert.alert('Please check your inbox for email verification!')
+    setLoading(false)
+  }
 
   return (
     <View style={styles.container}>
+      <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Input
+          label="Full Name"
+          leftIcon={{ type: 'font-awesome', name: 'user' }}
+          onChangeText={(text) => setFullName(text)}
+          value={fullName}
+          placeholder="Enter your full name"
+          autoCapitalize={'words'}
+        />
+      </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -60,7 +73,6 @@ export default function Auth() {
           value={email}
           placeholder="email@address.com"
           autoCapitalize={'none'}
-          errorMessage={errorMessage.email}
         />
       </View>
       <View style={styles.verticallySpaced}>
@@ -72,15 +84,14 @@ export default function Auth() {
           secureTextEntry={true}
           placeholder="Password"
           autoCapitalize={'none'}
-          errorMessage={errorMessage.password}
         />
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
       </View>
-      {/* <View style={styles.verticallySpaced}> */}
-        {/* <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} /> */}
-      {/* </View> */}
+      <View style={styles.verticallySpaced}>
+        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+      </View>
     </View>
   )
 }

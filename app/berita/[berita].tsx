@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,46 +12,84 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { content } from '~/constant/post'; // Sesuaikan dengan struktur folder Anda
 import { FontAwesome } from '@expo/vector-icons';
 import imageMap from '~/constant/imageMap';
+import { supabase } from '~/utils/supabase';
+import PostImage from '~/components/PostImage';
 
 export default function Berita() {
-  const { berita, kategori } = useLocalSearchParams();
+  const { berita } = useLocalSearchParams();
+  const [selectedPost, setSelectedPost] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredPost = content.filter((item) => item.id === kategori).flatMap((item) => item.posts);
-  const selectedPost = filteredPost.filter((item) => item.id.toString() === berita);
+  async function fetchPost() {
+    try {
+      const { data, error } = await supabase.from('post').select('*').eq('id', berita).single();
+      if (error) throw error;
+      setSelectedPost(data || []);
+    } catch (error) {
+      console.error('Error fetching post:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchPost();
+  }, [berita]);
+
+  if (loading) {
+    return (
+      <ScrollView>
+        <View style={styles.profileHeader}>
+          <View style={[styles.coverPhoto, styles.skeleton]} />
+          <View className="absolute bottom-0 w-full bg-black/60 p-4">
+            <View style={[styles.skeleton, { height: 12, width: '30%', marginBottom: 8 }]} />
+            <View style={[styles.skeleton, { height: 24, width: '80%', marginBottom: 8 }]} />
+            <View style={[styles.skeleton, { height: 14, width: '40%' }]} />
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <View className="px-4">
+            <View style={[styles.skeleton, { height: 20, width: '40%', marginBottom: 10 }]} />
+            <View style={[styles.skeleton, { height: 16, width: '100%', marginBottom: 8 }]} />
+            <View style={[styles.skeleton, { height: 16, width: '90%', marginBottom: 8 }]} />
+            <View style={[styles.skeleton, { height: 16, width: '95%' }]} />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <>
-      <Stack.Screen options={{ title: `${selectedPost[0].title}` }} />
-      <ScrollView >
-        {selectedPost.map((item, index) => {
-          return (
-            <View key={index}>
-              <View style={styles.profileHeader}>
-                <ImageBackground
+      <Stack.Screen options={{ title: `${selectedPost.title}` }} />
+      <ScrollView>
+        <View>
+          <View style={styles.profileHeader}>
+            {/* <ImageBackground
                   source={imageMap[item.image]}
                   style={styles.coverPhoto}
                   resizeMode='cover'
                   className='-z-10'
-                />
-                <View  className=' flex justify-end py-10 pl-4 absolute bg-black/60 w-full h-full -z-10'>
-                  <Text style={styles.date}>{item.startDate}</Text>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <Text style={styles.author}>By: Universitas Sriwijaya</Text>
-                </View>
-              </View>
-
-              <View style={styles.content}>
-                <View className="px-4">
-                  <Text style={styles.heading}>DESKRIPSI</Text>
-                  <Text style={styles.description}>
-                    {item.desc}{' '}
-                  </Text>
-                </View>
-                <View className="absolute inset-1 -top-5 -z-10 h-full w-full rounded-xl bg-[#f3f4f6]"></View>
-              </View>
+                /> */}
+            <PostImage image={selectedPost.image} className="-z-10 h-[300px] w-full" />
+            <View className=" absolute -z-10 flex h-full w-full justify-end bg-black/60 py-10 pl-4">
+              <Text style={styles.date}>
+                {new Date(selectedPost.created_at).toLocaleDateString()}
+              </Text>
+              <Text style={styles.title}>{selectedPost.title}</Text>
+              <Text style={styles.author}>{selectedPost.created_by}</Text>
             </View>
-          );
-        })}
+          </View>
+
+          <View style={styles.content}>
+            <View className="px-4">
+              <Text style={styles.heading}>DESKRIPSI</Text>
+              <Text style={styles.description}>{selectedPost.description} </Text>
+            </View>
+            <View className="absolute inset-0 -top-5 -z-10 h-full w-full rounded-xl bg-[#f3f4f6]"></View>
+          </View>
+        </View>
       </ScrollView>
     </>
   );
@@ -66,7 +104,6 @@ const styles = StyleSheet.create({
   coverPhoto: {
     height: 300,
     width: '100%',
-
   },
   profileImageContainer: {
     position: 'absolute',
@@ -135,5 +172,12 @@ const styles = StyleSheet.create({
   },
   highlight: {
     color: '#1d4ed8',
+  },
+  skeleton: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    overflow: 'hidden',
+    position: 'relative',
+    animation: 'pulse 1.5s infinite',
   },
 });

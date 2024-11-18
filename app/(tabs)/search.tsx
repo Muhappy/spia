@@ -1,45 +1,83 @@
 import { AntDesign, Feather } from '@expo/vector-icons';
 import {
   Image,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { content } from '../../constant/post';
 import imageMap from '../../constant/imageMap';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { supabase } from '~/utils/supabase';
+import PostImage from '~/components/PostImage';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  
+  const [post, setPost] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // Fix the flatMap implementation to correctly include category ID
-  const allPosts = content.flatMap(category => 
-    category.posts.map(post => ({
-      ...post,
-      kategori: category.id
-    }))
-  );
-  
-  const filteredPosts = allPosts.filter(post => 
+  const allPosts = post.map((post) => ({
+    ...post,
+    kategori: post.category_id
+  }));
+
+  const filteredPosts = allPosts.filter((post) =>
     post.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handlePostPress = (postId: number, kategori: string) => {
     router.push({
       pathname: '/berita/[berita]',
-      params: { berita: `${postId}`, kategori: `${kategori}` },
+      params: { berita: `${postId}` },
     });
+    
   };
+
+  const fetchPosts = async () => {
+    setIsLoading(true);
+    console.log('Fetching posts...');
+    try {
+      const { data, error } = await supabase
+        .from('post')
+        .select(`
+          *,
+          category:category_id (
+            id,
+            name
+          )
+        `);
+      
+      if (error) {
+        console.error('Supabase error:', error.message);
+        return;
+      }
+      
+
+      setPost(data);
+    } catch (e) {
+      console.error('Exception occurred:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    
+    fetchPosts();
+  }, []);
 
   return (
     <>
       <SafeAreaView>
-        <ScrollView>
+        
+        <ScrollView refreshControl={<RefreshControl refreshing={false} onRefresh={fetchPosts} />}>
           <View className="p-4">
             <View className="mb-4 items-center">
               <Text className="text-2xl font-bold">Mau cari pengumuman apaa?</Text>
@@ -53,10 +91,7 @@ export default function Home() {
                 onChangeText={setSearchQuery}
                 autoCapitalize="none"
               />
-              <TouchableOpacity 
-                className="ml-4"
-                onPress={() => setSearchQuery('')}
-              >
+              <TouchableOpacity className="ml-4" onPress={() => setSearchQuery('')}>
                 {searchQuery ? (
                   <AntDesign name="close" size={24} />
                 ) : (
@@ -66,37 +101,41 @@ export default function Home() {
             </View>
 
             <Text className="mb-4 text-lg font-semibold">
-              {searchQuery ? `Hasil Pencarian (${filteredPosts.length})` : 'Rekomendasi Informasi buat kamu!'}
+              {searchQuery
+                ? `Hasil Pencarian (${filteredPosts.length})`
+                : 'Rekomendasi Informasi buat kamu!'}
             </Text>
 
             <View className="gap-4 space-y-4">
-              {filteredPosts ? (
+              {isLoading ? (
+                // Skeleton loading UI
+                [...Array(3)].map((_, index) => (
+                  <View key={index} className="rounded-lg bg-white p-4 shadow">
+                    <View className="mb-2 h-44 w-full animate-pulse rounded-lg bg-gray-200" />
+                    <View className="mb-2 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <View className="h-4 w-full animate-pulse rounded bg-gray-200" />
+                  </View>
+                ))
+              ) : filteredPosts ? (
                 filteredPosts.map((post) => (
-                  <TouchableOpacity 
-                    key={`${post.id}`} 
+                  <TouchableOpacity
+                    key={`${post.id}`}
                     className="rounded-lg bg-white p-4 shadow"
-                    onPress={() => handlePostPress(post.id, post.kategori)}
-                  >
+                    onPress={() => handlePostPress(post.id, post.kategori)}>
                     <View className="relative mb-2 flex flex-row overflow-hidden">
-                      <Image
-                        source={imageMap[post.image]}
-                        resizeMode="cover"
-                        alt={post.title}
-                        className="relative mr-4 h-44 w-full rounded-lg"
-                      />
-                      <TouchableOpacity 
+                      <PostImage image={post.image} className="h-44 w-full rounded-lg" />
+                      <TouchableOpacity
                         className="absolute right-0 top-0 rounded-md bg-gray-900 p-2 opacity-25"
                         onPress={(e) => {
                           e.stopPropagation(); // Prevent triggering parent onPress
                           // Handle bookmark logic here
-                        }}
-                      >
+                        }}>
                         <Feather name="bookmark" size={24} color="white" />
                       </TouchableOpacity>
                     </View>
                     <Text className="font-semibold">{post.title}</Text>
                     <Text>
-                      {post.desc.substring(0, 100)}... 
+                      {post.description.substring(0, 100)}...
                       <Text className="font-semibold">Read More</Text>
                     </Text>
                   </TouchableOpacity>
@@ -111,6 +150,7 @@ export default function Home() {
             </View>
           </View>
         </ScrollView>
+
       </SafeAreaView>
     </>
   );

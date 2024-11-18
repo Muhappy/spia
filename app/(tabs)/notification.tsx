@@ -54,6 +54,7 @@ const notifications = [
 ];
 
 export default function NotificationScreen() {
+    
     return (
         <View style={styles.container}>
             <FlatList

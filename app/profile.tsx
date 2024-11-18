@@ -23,23 +23,24 @@ export default function Profile() {
   return (
     <View>
       {session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}
+      <OptionItem icon='user' text='Profile'/>
     </View>
   )
 }
 
-// interface OptionItemProps {
-//   icon: any,
-//   text: string
-// }
+interface OptionItemProps {
+  icon: any,
+  text: string
+}
 
-// const OptionItem = ({ icon, text, }:OptionItemProps) => (
-//   <TouchableOpacity style={styles.optionItem}>
-//     <View style={styles.optionLeft}>
-//       <FontAwesome name={icon} type="font-awesome-5" size={16} />
-//       <Text style={styles.optionText}>{text}</Text>
-//     </View>
-//   </TouchableOpacity>
-// );
+const OptionItem = ({ icon, text, }:OptionItemProps) => (
+  <TouchableOpacity style={styles.optionItem}>
+    <View style={styles.optionLeft}>
+      <FontAwesome name={icon} type="font-awesome-5" size={16} />
+      <Text style={styles.optionText}>{text}</Text>
+    </View>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: {
