@@ -3,7 +3,6 @@ import { Feather } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 
 import {
-  Image,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -38,7 +37,7 @@ export default function Home() {
   const fetchBookmarks = async () => {
     setBookmarks([]);
     try {
-      const { data, error } = await supabase
+      const { data, error }:{ data: any, error: any } = await supabase
         .from('bookmark')
         .select(
           `
@@ -57,9 +56,9 @@ export default function Home() {
     }
   };
 
-  const toggleBookmark = async (postId) => {
+  const toggleBookmark = async (postId: any) => {
     try {
-      const existingBookmark = bookmarks.find((b) => b.post_id === postId);
+      const existingBookmark = bookmarks.find((b:any) => b.post_id === postId);
 
       if (existingBookmark) {
         const { error } = await supabase
@@ -69,7 +68,7 @@ export default function Home() {
           .eq('post_id', postId);
 
         if (error) throw error;
-        setBookmarks(bookmarks.filter((b) => b.post_id !== postId));
+        setBookmarks(bookmarks.filter((b:any) => b.post_id !== postId));
       }
     } catch (error) {
       console.error('Error toggling bookmark:', error);
@@ -94,7 +93,7 @@ export default function Home() {
               Berikut Informasi yang Telah Kamu Simpan!
             </Text>
             <View className="gap-4 space-y-4">
-              {bookmarks.map((post) => (
+              {bookmarks.map((post:any) => (
                 <TouchableOpacity onPress={() => router.push(`/berita/${post.posts.id}`)} key={post.id} className="rounded-lg bg-white p-4 shadow">
                   <View className="relative mb-2 flex flex-row">
                     <PostImage
@@ -104,7 +103,7 @@ export default function Home() {
                     <TouchableOpacity
                       onPress={() => toggleBookmark(post.posts.id)}
                       className={`absolute right-0 top-0 rounded-md p-2 ${
-                        bookmarks.some((b) => b.post_id === post.posts.id)
+                        bookmarks.some((b:any) => b.post_id === post.posts.id)
                           ? 'bg-blue-500'
                           : 'bg-gray-900 opacity-25'
                       }`}>
@@ -136,10 +135,3 @@ export default function Home() {
     </SafeAreaView>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 24,
-//   },
-// });

@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import React, {  useState } from 'react';
+import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { supabase } from '~/utils/supabase';
 import Account from '~/components/Account';
 import Auth from '~/components/Auth';
-import { Session } from '@supabase/supabase-js';
 import { useAuth } from '~/provider/AuthProvider';
 import Avatar from '~/components/Avatar';
-import { Button } from '~/components/Button';
-import { Input } from '@rneui/themed/dist/Input';
 
 export default function Profile() {
   const { session, profile, user } = useAuth();

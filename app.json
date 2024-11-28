@@ -36,6 +36,15 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.kelompok4.spia"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7dea8a30-c687-4e03-8d20-57cd250f018b"
       }
     }
   }

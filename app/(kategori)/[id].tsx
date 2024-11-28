@@ -19,12 +19,12 @@ export default function Kategori() {
   const { id } = useLocalSearchParams();
 
 
-  const [category, setCategory] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [category, setCategory] = useState<any>([]);
+  const [filteredPosts, setFilteredPosts] = useState<any>([]);
 
   useEffect(() => {
     async function fetchPosts() {
-      const { data, error } = await supabase.from('post').select('*').eq('category_id', id);
+      const { data, error }:{data: any, error:any} = await supabase.from('post').select('*').eq('category_id', id);
 
       if (error) {
         console.error('Error fetching posts:', error);
@@ -33,7 +33,7 @@ export default function Kategori() {
       setFilteredPosts(data || []);
     }
     async function fetchCategory() {
-      const { data, error } = await supabase.from('category').select('*').eq('id', id).single();
+      const { data, error }:{data: any, error:any} = await supabase.from('category').select('*').eq('id', id).single();
       if (error) {
         console.error('Error fetching posts:', error);
         return;

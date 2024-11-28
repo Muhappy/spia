@@ -18,16 +18,17 @@ import { supabase } from '~/utils/supabase';
 import PostImage from '~/components/PostImage';
 import { useAuth } from '~/provider/AuthProvider';
 
+
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const [post, setPost] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { session, user } = useAuth();
-  const [bookmarks, setBookmarks] = useState([]);
+  const [bookmarks, setBookmarks] = useState<any>([]);
 
   // Fix the flatMap implementation to correctly include category ID
-  const allPosts = post.map((post) => ({
+  const allPosts = post.map((post : any) => ({
     ...post,
     kategori: post.category_id
   }));
@@ -48,7 +49,7 @@ export default function Home() {
     setIsLoading(true);
     console.log('Fetching posts...');
     try {
-      const { data, error } = await supabase
+      const { data, error }:{data: any, error: any} = await supabase
         .from('post')
         .select(`
           *,
@@ -76,7 +77,7 @@ export default function Home() {
     if (!session?.user) return;
     setBookmarks([])
     try {
-      const { data, error } = await supabase
+      const { data, error }:{data: any, error: any} = await supabase
         .from('bookmark')
         .select('post_id')
         .eq('user_id', user?.id);
@@ -98,7 +99,7 @@ export default function Home() {
     }
 
     try {
-      const isBookmarked = bookmarks.some(b => b.post_id === postId);
+      const isBookmarked = bookmarks.some((b: any) => b.post_id === postId);
 
       if (isBookmarked) {
         // Remove bookmark
@@ -109,7 +110,7 @@ export default function Home() {
           .eq('post_id', postId);
 
         if (error) throw error;
-        setBookmarks(bookmarks.filter(b => b.post_id !== postId));
+        setBookmarks(bookmarks.filter((b:any) => b.post_id !== postId));
       } else {
         // Add bookmark
         const { error } = await supabase
@@ -120,7 +121,7 @@ export default function Home() {
           });
 
         if (error) throw error;
-        setBookmarks([...bookmarks, { post_id: postId }]);
+        setBookmarks([...bookmarks, { post_id: postId }]); //Fix This, error Argument of type any is not assignable to parameter of type SetStateAction<Never[]>
       }
     } catch (error) {
       console.error('Error toggling bookmark:', error);
@@ -185,7 +186,7 @@ export default function Home() {
                       <PostImage image={post.image} className="h-44 w-full rounded-lg" />
                       <TouchableOpacity
                         className={`absolute right-0 top-0 rounded-md p-2 ${
-                          bookmarks.some(b => b.post_id === post.id)
+                          bookmarks.some((b:any) => b.post_id === post.id)
                             ? 'bg-blue-500'
                             : 'bg-gray-900 opacity-25'
                         }`}

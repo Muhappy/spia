@@ -2,27 +2,21 @@ import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  ImageBackground,
 } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { content } from '~/constant/post'; // Sesuaikan dengan struktur folder Anda
-import { FontAwesome } from '@expo/vector-icons';
-import imageMap from '~/constant/imageMap';
 import { supabase } from '~/utils/supabase';
 import PostImage from '~/components/PostImage';
 
 export default function Berita() {
   const { berita } = useLocalSearchParams();
-  const [selectedPost, setSelectedPost] = useState<any[]>([]);
+  const [selectedPost, setSelectedPost] = useState<any>([]);
   const [loading, setLoading] = useState(true);
 
   async function fetchPost() {
     try {
-      const { data, error } = await supabase.from('post').select('*').eq('id', berita).single();
+      const { data, error }:{data:any, error:any} = await supabase.from('post').select('*').eq('id', berita).single();
       if (error) throw error;
       setSelectedPost(data || []);
     } catch (error) {

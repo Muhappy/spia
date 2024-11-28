@@ -7,7 +7,6 @@ import {
   ScrollView,
   Text,
   View,
-  ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
 import { Button } from '~/components/Button';
@@ -56,7 +55,7 @@ export default function Home() {
       const randomOffset = Math.floor(Math.random() * (count ?? 0));
 
       // Fetch posts with random offset
-      const { data, error } = await supabase
+      const { data, error }:{data:any, error:any} = await supabase
         .from('post')
         .select(
           `
@@ -193,8 +192,8 @@ export default function Home() {
                         pathname: '/berita/[berita]',
                         params: { berita: `${post.id}` },
                       });
-                    }}>
-                    <View key={post.id} className="mb-4 overflow-hidden">
+                    }} key={post.id} >
+                    <View className="mb-4 overflow-hidden">
                       <PostImage
                         image={post.image}
                         className="relative mr-4 h-44 w-full rounded-lg"
