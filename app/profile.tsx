@@ -1,125 +1,144 @@
-// Profile.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet, ImageBackground } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons'; 
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 import { supabase } from '~/utils/supabase';
 import Account from '~/components/Account';
 import Auth from '~/components/Auth';
 import { Session } from '@supabase/supabase-js';
+import { useAuth } from '~/provider/AuthProvider';
+import Avatar from '~/components/Avatar';
+import { Button } from '~/components/Button';
+import { Input } from '@rneui/themed/dist/Input';
 
 export default function Profile() {
-  const [session, setSession] = useState<Session | null>(null)
+  const { session, profile, user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-    })
+  async function updateProfile({ avatar_url }: { avatar_url: string }) {
+    try {
+      setLoading(true);
+      if (!session?.user) throw new Error('No user on the session!');
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-  }, [])
+      const updates = {
+        id: session?.user.id,
+        avatar_url,
+        updated_at: new Date(),
+      };
 
-  return (
-    <View>
-      {session && session.user ? <Account key={session.user.id} session={session} /> : <Auth />}
-      <OptionItem icon='user' text='Profile'/>
-    </View>
-  )
+      const { error } = await supabase.from('profiles').upsert(updates);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+  return session && session.user ? (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className='flex-1'>
+      <View className='flex-1 bg-gray-50'>
+        <View style={styles.profileHeader}>
+          <View style={styles.coverPhoto}>
+        
+          </View>
+          
+          <View style={styles.profileInfo}>
+            <View style={styles.avatarContainer}>
+              <Avatar
+                size={120}
+                url={avatarUrl}
+                onUpload={(url: string) => {
+                  setAvatarUrl(url);
+                  updateProfile({ avatar_url: url });
+                }}
+              />
+            </View>
+            <View style={styles.textContainer}>
+              <Text className='text-2xl font-bold capitalize text-white' style={styles.profileName}>
+                {profile?.full_name || 'Set your name'}
+              </Text>
+              <Text className='text-base text-gray-100' style={styles.profileDetails}>
+                {user?.email}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.contentContainer}>
+          <Account session={session} />
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  ) : (
+    <Auth />
+  );
 }
-
-interface OptionItemProps {
-  icon: any,
-  text: string
-}
-
-const OptionItem = ({ icon, text, }:OptionItemProps) => (
-  <TouchableOpacity style={styles.optionItem}>
-    <View style={styles.optionLeft}>
-      <FontAwesome name={icon} type="font-awesome-5" size={16} />
-      <Text style={styles.optionText}>{text}</Text>
-    </View>
-  </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F3F4F6',
-  },
-  scrollContainer: {
-    alignItems: 'center',
-  },
   profileHeader: {
-    position: 'relative',
     width: '100%',
-    alignItems: 'center',
-  },
-  coverPhoto: {
-    height: 150,
-    width: '100%',
-  },
-  profileImageContainer: {
-    position: 'absolute',
-    top: 80,
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-  },
-  editIcon: {
-    position: 'absolute',
-    bottom: 3,
-    right: 6,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    padding: 4,
+    backgroundColor: '#3B82F6', // Menggunakan warna blue-500
+    overflow: 'hidden',
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  coverPhoto: {
+    height: 120,
+    width: '100%',
+    backgroundColor: '#2563EB', // Warna blue-600 untuk variasi
+    position: 'absolute',
+    top: 0,
+  },
+  avatarContainer: {
+    marginTop: 60,
+    padding: 4,
+    backgroundColor: 'white',
+    borderRadius: 999,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   profileInfo: {
-    marginTop: 50,
     alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+    width: '100%',
   },
   profileName: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   profileDetails: {
-    color: '#6B7280',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    opacity: 0.95,
+    letterSpacing: 0.3,
   },
-  optionContainer: {
-    width: '90%',
-    marginTop: 20,
-  },
-  optionItem: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  optionText: {
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  optionRightText: {
-    color: '#3B82F6',
+  contentContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB', // gray-50
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginTop: -20,
+    paddingTop: 20,
   },
 });

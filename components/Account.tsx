@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from 'utils/supabase';
-import { StyleSheet, View, Alert } from 'react-native';
-import { Button, Input } from '@rneui/themed';
+import { StyleSheet, View, Alert, Text } from 'react-native';
+import { Input } from '@rneui/themed';
 import { Session } from '@supabase/supabase-js';
 import Avatar from './Avatar';
+import { Button } from '~/components/Button';
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
-  const [website, setWebsite] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [full_name, setFullName] = useState('');
 
   useEffect(() => {
     if (session) getProfile();
@@ -22,7 +22,7 @@ export default function Account({ session }: { session: Session }) {
 
       const { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`username, full_name`)
         .eq('id', session?.user.id)
         .single();
       if (error && status !== 406) {
@@ -31,8 +31,7 @@ export default function Account({ session }: { session: Session }) {
 
       if (data) {
         setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
+        setFullName(data.full_name);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -44,13 +43,9 @@ export default function Account({ session }: { session: Session }) {
   }
 
   async function updateProfile({
-    username,
-    website,
-    avatar_url,
+    full_name,
   }: {
-    username: string;
-    website: string;
-    avatar_url: string;
+    full_name: string;
   }) {
     try {
       setLoading(true);
@@ -58,9 +53,7 @@ export default function Account({ session }: { session: Session }) {
 
       const updates = {
         id: session?.user.id,
-        username,
-        website,
-        avatar_url,
+        full_name,
         updated_at: new Date(),
       };
 
@@ -80,36 +73,34 @@ export default function Account({ session }: { session: Session }) {
 
   return (
     <View style={styles.container}>
-      <View>
-        <Avatar
-          size={200}
-          url={avatarUrl}
-          onUpload={(url: string) => {
-            setAvatarUrl(url);
-            updateProfile({ username, website, avatar_url: url });
-          }}
-        />
-      </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
-      </View>
-      {/* <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
-      </View> */}
+      <Text className='text-2xl font-bold text-gray-800 mb-6'>Account Settings</Text>
 
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button
-          title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
-          disabled={loading}
-        />
+      <View style={styles.card}>
+        <View style={styles.verticallySpaced}>
+          <Input
+            label="Full Name"
+            value={full_name || ''}
+            onChangeText={(text) => setFullName(text)}
+            placeholder="Enter your full name"
+            labelStyle={styles.inputLabel}
+            containerStyle={styles.inputContainer}
+          />
+        </View>
+
+        <View style={[styles.verticallySpaced, styles.mt20]}>
+          <Button 
+            title={loading ? 'Saving...' : 'Save Changes'}
+            onPress={() => updateProfile({full_name})}
+            disabled={loading}
+          />
+        </View>
       </View>
 
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+      <View style={[styles.card, styles.mt20]}>
+        <Button 
+          title="Sign Out" 
+          onPress={() => supabase.auth.signOut()}
+        />
       </View>
     </View>
   );
@@ -117,8 +108,18 @@ export default function Account({ session }: { session: Session }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    padding: 12,
+    flex: 1,
+    padding: 16,
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
   },
   verticallySpaced: {
     paddingTop: 4,
@@ -127,5 +128,13 @@ const styles = StyleSheet.create({
   },
   mt20: {
     marginTop: 20,
+  },
+  inputLabel: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  inputContainer: {
+    paddingHorizontal: 0,
   },
 });

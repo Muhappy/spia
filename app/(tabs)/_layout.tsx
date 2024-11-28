@@ -30,13 +30,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="notification"
         options={{
           title: 'Notification',
           tabBarIcon: ({ color }) => <TabBarIcon name="bell" color={color} />,
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="bookmark"
         options={{

@@ -19,7 +19,7 @@ export default function RootLayout() {
       <Stack.Screen name='(kategori)' options={{headerShown:false, presentation:'card'}}/>
       <Stack.Screen name='berita/[berita]' options={{presentation:"modal"}}/>
       {/* <Stack.Screen name="modal" options={{ presentation: 'modal' }} /> */}
-      <Stack.Screen name="profile" options={{  presentation: 'modal', headerShown:false, headerBackTitleVisible:false, headerTintColor:"black",}} />
+      <Stack.Screen name="profile" options={{  presentation: 'modal', headerShown:false, headerTintColor:"black",}} />
     </Stack>
     </AuthProvider>
   );
